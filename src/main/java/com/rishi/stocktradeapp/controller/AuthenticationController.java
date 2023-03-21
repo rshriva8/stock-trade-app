@@ -5,6 +5,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.security.spec.InvalidKeySpecException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.rishi.stocktradeapp.config.JWTTokenHelper;
 import com.rishi.stocktradeapp.dao.OrderRepository;
 import com.rishi.stocktradeapp.dao.OwnershipRepository;
+import com.rishi.stocktradeapp.dao.StockDailyRepository;
 import com.rishi.stocktradeapp.dao.StockRepository;
 import com.rishi.stocktradeapp.dao.UserRepository;
 import com.rishi.stocktradeapp.entity.Ownership;
@@ -34,6 +36,7 @@ import com.rishi.stocktradeapp.entity.Transaction;
 import com.rishi.stocktradeapp.entity.User;
 import com.rishi.stocktradeapp.requests.AuthenticationRequest;
 import com.rishi.stocktradeapp.responses.LoginResponse;
+import com.rishi.stocktradeapp.responses.StockInfo;
 import com.rishi.stocktradeapp.responses.UserInfo;
 
 @RestController
@@ -58,6 +61,8 @@ public class AuthenticationController {
 	
 	@Autowired
 	private UserRepository userRepository;
+	@Autowired
+	private StockDailyRepository stockDailyRepository;
 
 	@PostMapping("/auth/login")
 	public ResponseEntity<?> login(@RequestBody AuthenticationRequest authenticationRequest) throws InvalidKeySpecException, NoSuchAlgorithmException {
@@ -188,6 +193,19 @@ public class AuthenticationController {
 		userRepository.save(userObj);
 		return ResponseEntity.ok(userObj);
 	}
+	@GetMapping("/auth/stockdata")
+	public List<StockInfo> getStockInfo() {
+	    List<Stock> stocks = stockRepository.findAll();
+	    List<StockInfo> stockInfoList = new ArrayList<>();
+	    for (Stock stock : stocks) {
+	        double dailyLow = stockDailyRepository.findDailyLowByStockIdAndTodayDate(stock.getId());
+	        double dailyHigh = stockDailyRepository.findDailyHighByStockIdAndTodayDate(stock.getId());
+	        StockInfo stockInfo = new StockInfo(stock.getId(), stock.getStockName(), stock.getStockValue(), dailyLow, dailyHigh, stock.getStockVolume());
+	        stockInfoList.add(stockInfo);
+	    }
+	    return stockInfoList;
+	}
+	
 	@Autowired
 	OwnershipRepository ownershipRepository;
 	@GetMapping("/auth/myportfolio")
