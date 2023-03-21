@@ -25,11 +25,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.rishi.stocktradeapp.config.JWTTokenHelper;
+import com.rishi.stocktradeapp.dao.MarketScheduleRepository;
 import com.rishi.stocktradeapp.dao.OrderRepository;
 import com.rishi.stocktradeapp.dao.OwnershipRepository;
 import com.rishi.stocktradeapp.dao.StockDailyRepository;
 import com.rishi.stocktradeapp.dao.StockRepository;
 import com.rishi.stocktradeapp.dao.UserRepository;
+import com.rishi.stocktradeapp.entity.MarketSchedule;
 import com.rishi.stocktradeapp.entity.Ownership;
 import com.rishi.stocktradeapp.entity.Stock;
 import com.rishi.stocktradeapp.entity.Transaction;
@@ -63,6 +65,9 @@ public class AuthenticationController {
 	private UserRepository userRepository;
 	@Autowired
 	private StockDailyRepository stockDailyRepository;
+	
+	@Autowired
+    private MarketScheduleRepository marketScheduleRepository;
 
 	@PostMapping("/auth/login")
 	public ResponseEntity<?> login(@RequestBody AuthenticationRequest authenticationRequest) throws InvalidKeySpecException, NoSuchAlgorithmException {
@@ -81,6 +86,12 @@ public class AuthenticationController {
 
 		return ResponseEntity.ok(response);
 	}
+	@PostMapping("/set-schedule")
+	  public MarketSchedule createMarketHours(@RequestBody MarketSchedule marketHours) {
+	    return marketScheduleRepository.save(marketHours);
+	  }
+	
+	
 	
 	@GetMapping("/auth/userinfo")
 	public ResponseEntity<?> getUserInfo(Principal user){
@@ -205,6 +216,7 @@ public class AuthenticationController {
 	    }
 	    return stockInfoList;
 	}
+
 	
 	@Autowired
 	OwnershipRepository ownershipRepository;
