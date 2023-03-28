@@ -2,8 +2,10 @@ package com.rishi.stocktradeapp.controller;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.Optional;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -16,7 +18,7 @@ import com.rishi.stocktradeapp.dao.HolidayRepository;
 import com.rishi.stocktradeapp.entity.Holiday;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/holiday")
 @CrossOrigin
 public class HolidayController {
 	
@@ -32,15 +34,14 @@ public class HolidayController {
 	    return holidayRepository.save(holiday);
 	  }
 	
-	@GetMapping("/check-holiday")
-	public boolean checkHoliday(@RequestParam("date") String date) throws ParseException {
-		SimpleDateFormat formatter1=new SimpleDateFormat("yyyy-MM-dd");  
-		Date d1=formatter1.parse(date);
-		Optional<Holiday> holiday = holidayRepository.findByDate(d1);
-        if (holiday.isPresent()) {
-        	return true;
-        } else {
-            return false;
+	@GetMapping("/get-holidays")
+    public List<Date> getHolidayList() {
+        List<Holiday> holidayList = holidayRepository.findAll();
+        List<Date> dateList = new ArrayList<>();
+        for (Holiday holiday : holidayList) {
+            dateList.add(holiday.getDate());
         }
+        return dateList;
     }
+	
 }
