@@ -2,10 +2,9 @@ package com.rishi.stocktradeapp.controller;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -35,13 +34,18 @@ public class HolidayController {
 	  }
 	
 	@GetMapping("/get-holidays")
-    public List<Date> getHolidayList() {
-        List<Holiday> holidayList = holidayRepository.findAll();
-        List<Date> dateList = new ArrayList<>();
-        for (Holiday holiday : holidayList) {
-            dateList.add(holiday.getDate());
-        }
-        return dateList;
+    public List<Holiday> getHolidayList() {
+		return holidayRepository.findAll();
+    }
+	
+	@GetMapping("/delete")
+    public List<Holiday> deleteHoliday(@RequestParam("id") int id) {
+		Optional<Holiday> existingHoliday = holidayRepository.findById(id);
+   	 	if (existingHoliday.isPresent()) {
+   	      	Holiday updatedExistingHoliday = existingHoliday.get();
+   	      	holidayRepository.delete(updatedExistingHoliday);
+   	 }
+		return holidayRepository.findAll();
     }
 	
 }

@@ -17,19 +17,16 @@ export const CancelOrder = () => {
     const [stock, setStock] = useState<StockModel>();
     const [isLoading, setIsLoading] = useState(true);
     const [httpError, setHttpError] = useState(null);
-    const [inputValue, setInputValue] = useState<string>("");
-    const [result, setResult] = useState<number>(0);
-    const [buyVolume, setBuyVolume] = useState('');
     const [balance, setBalance] = useState(null);
     const [isOpen, setIsOpen] = useState(false);
     const [marketSchedule, setMarketSchedule] = useState<MarketDay[]>([]);
-    const[loaded,setLoaded]=useState(false);
-
+    const [holidays, setHolidays] = useState<any[]>([])
+    const [isHoliday, setIsHoliday] = useState(false);
 
 
     const orderId = (window.location.pathname).split('/')[2];
     useEffect(() => {
-        const fetchStocks = async () => {
+        const fetchUser = async () => {
           axios.get('http://localhost:8080/api/v1/auth/userinfo', {
                 headers: {
                     Authorization: `${localStorage.getItem('token')}`
@@ -41,10 +38,47 @@ export const CancelOrder = () => {
                 .catch(error => {
                     console.log(error);
                 });
+                setIsLoading(false);
+                fetchMarketSchedule();
 
         };
-        setIsLoading(false);
+        fetchUser().catch((error: any) => {
+            setIsLoading(false);
+            setHttpError(error.message);
+        })
     },[]);
+
+    useEffect(() => {
+        async function fetchHolidays() {
+          const result = await axios.get('http://localhost:8080/api/holiday/get-holidays', {
+            headers: {
+                Authorization: `${localStorage.getItem('token')}`
+            }});
+          setHolidays(result.data);
+        }
+    
+        fetchHolidays();
+      }, []);
+
+      useEffect(() => {
+        const today = new Date();
+        const todaysdate = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+        holidays.forEach(holiday => {
+            const idate=holiday.date
+            const formatDate = (idate: Date) => {
+                const date = new Date(idate);
+                const year = date.getFullYear();
+                const month = date.getMonth() + 1;
+                const day = date.getDate();
+                return `${year}-${month}-${day}`;
+              }
+          if (formatDate(idate) == todaysdate) {
+            setIsHoliday(true);
+            console.log("true hai")
+          }
+        });
+      }, [holidays]);
+
     const fetchMarketSchedule = async () => {
         const response = await fetch("http://localhost:8080/market-hours/marketSchedule", {
             headers: {
@@ -56,18 +90,17 @@ export const CancelOrder = () => {
         }
         const data = await response.json();
         setMarketSchedule(data);
-        checkMarketStatus();
       };
-      const checkMarketStatus = () => {
-        // Get the current time and day of the week
+      useEffect(() => {
         const now = new Date();
         const currentDay = now.getDay();
         const currentTime = now.getHours() * 60 + now.getMinutes();
     
         // Check if the market is open
+        console.log(marketSchedule)
         const marketDay = marketSchedule.find(day => day.openDaysOfWeek.toString() === currentDay.toString());
         console.log(currentDay)
-        if (marketDay && marketDay.open) {
+        if (marketDay) {
             const openTime = marketDay.openingTime.split(":").map(Number);
           const closeTime = marketDay.closingTime.split(":").map(Number);
           const openMinutes = openTime[0] * 60 + openTime[1];
@@ -77,9 +110,7 @@ export const CancelOrder = () => {
             setIsOpen(true);
           }
         }
-      };
-      fetchMarketSchedule();
-      
+      }, [marketSchedule])
     
       if (isLoading) {
         return (
@@ -98,7 +129,8 @@ export const CancelOrder = () => {
         
 
         event.preventDefault();
-        if (isOpen) {
+        if(isHoliday) alert("TODAY IS HOLIDAY!")
+        else if (isOpen) {
             axios.get(`http://localhost:8080/api/orders/delete/${orderId}`, {
                 headers: {
                     Authorization: `${localStorage.getItem('token')}`

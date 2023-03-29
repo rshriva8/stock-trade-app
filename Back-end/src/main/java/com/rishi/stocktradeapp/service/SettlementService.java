@@ -57,13 +57,13 @@ public class SettlementService {
 
     private void executeBuyTransaction(LimitOrder limitOrder, double stockValue) {
     	logger.info("******************BUYING LIMIT ORDER");
-        double totalPrice = limitOrder.getOrderVolume() * limitOrder.getDesiredPrice();
+        double totalPrice = limitOrder.getOrderVolume() * stockValue;
         Stock stock=limitOrder.getStock();
         stock.setStockVolume(stock.getStockVolume()-limitOrder.getOrderVolume());
         User user=limitOrder.getUser();
         user.setBalance(user.getBalance()-totalPrice);
         Transaction transaction = new Transaction();
-        transaction.setOpenPrice(limitOrder.getDesiredPrice());
+        transaction.setOpenPrice(stockValue);
         transaction.setUser(user);
         transaction.setStock(stock);
         transaction.setOrderTimestamp(LocalDateTime.now());
@@ -79,13 +79,13 @@ public class SettlementService {
 
     private void executeSellTransaction(LimitOrder limitOrder, double stockPrice) {
     	logger.info("*****************SELLING LIMIT ORDER");
-        double totalPrice = limitOrder.getOrderVolume() * limitOrder.getDesiredPrice();
+        double totalPrice = limitOrder.getOrderVolume() * stockPrice;
         Stock stock=limitOrder.getStock();
         stock.setStockVolume(stock.getStockVolume()+limitOrder.getOrderVolume());
         User user=limitOrder.getUser();
         user.setBalance(user.getBalance()+totalPrice);
         Transaction transaction = new Transaction();
-        transaction.setOpenPrice(limitOrder.getDesiredPrice());
+        transaction.setOpenPrice(stockPrice);
         transaction.setUser(user);
         transaction.setStock(stock);
         transaction.setOrderTimestamp(LocalDateTime.now());

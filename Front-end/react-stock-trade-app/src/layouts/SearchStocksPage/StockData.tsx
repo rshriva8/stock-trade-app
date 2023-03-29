@@ -10,7 +10,6 @@ function StockData() {
   const [isLoading, setIsLoading] = useState(true);
     const [httpError, setHttpError] = useState(null);
     const [lastCallTime, setLastCallTime] = useState(0);
-    const [data, setData] = useState(null);
 
   useEffect(() => {
     const fetchStocks = async () => {
@@ -77,11 +76,11 @@ if (httpError) {
                                     <td>{stockInfo.id}</td>
                                     <td>{stockInfo.name}</td>
                                     <td>{stockInfo.ticker}</td>
-                                    <td>{stockInfo.price}</td>
-                                    <td>{stockInfo.dailyLow}</td>
-                                    <td>{stockInfo.dailyHigh}</td>
+                                    <td>${stockInfo.price}</td>
+                                    <td>${stockInfo.dailyLow}</td>
+                                    <td>${stockInfo.dailyHigh}</td>
                                     <td>{stockInfo.volume}</td>
-                                    <td>{stockInfo.volume * stockInfo.price}</td>
+                                    <td>${stockInfo.volume * stockInfo.price}</td>
                                     <td><Link to={`/checkout/${stockInfo.id}`}><button className="btn btn-primary">Buy Now</button></Link></td>
                                 </tr>
                             ))}

@@ -31,17 +31,13 @@ public class MarketSchedule {
     @Type(type = "java.time.LocalTime")
     @Column(name="closing_time")
     private LocalTime closingTime;
-    
-    @Column(name="is_open")
-    private boolean isOpen;
 
     public MarketSchedule() {}
 
-    public MarketSchedule(int openDaysOfWeek, LocalTime openingTime, LocalTime closingTime, boolean isOpen) {
+    public MarketSchedule(int openDaysOfWeek, LocalTime openingTime, LocalTime closingTime) {
         this.openDaysOfWeek = openDaysOfWeek;
         this.openingTime = openingTime;
         this.closingTime = closingTime;
-        this.isOpen=isOpen;
     }
 
     public int getId() {
@@ -75,12 +71,4 @@ public class MarketSchedule {
     public void setClosingTime(LocalTime closingTime) {
         this.closingTime = closingTime;
     }
-
-	public boolean isOpen() {
-		return isOpen;
-	}
-
-	public void setOpen(boolean isOpen) {
-		this.isOpen = isOpen;
-	}
 }

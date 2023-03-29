@@ -4,7 +4,7 @@ import axios from 'axios';
 interface StockRegistration {
   stockName: string;
   stockValue: number;
-  stockTicker: number;
+  stockTicker: string;
   stockVolume: number;
 }
 
@@ -12,7 +12,7 @@ export const StockRegistrationForm: React.FC = () => {
   const [formData, setFormData] = useState<StockRegistration>({
     stockName: "",
     stockValue: 0,
-    stockTicker: 0,
+    stockTicker: "",
     stockVolume: 0,
   });
 
@@ -37,7 +37,13 @@ export const StockRegistrationForm: React.FC = () => {
         headers: { Authorization: `${token}` },
         mode: 'cors',
       };
-      const response = axios.post(url, formData, config);
+      axios.post(url, formData, config)
+      .then(response => {
+        alert("STOCK REGISTERED SUCCESSFULLY!!!")
+      })
+      .catch(error => {
+        console.log(error);
+      });
       }
     }
   const validateFormData = (data: StockRegistration): string[] => {
@@ -55,8 +61,6 @@ export const StockRegistrationForm: React.FC = () => {
 
     if (!data.stockTicker) {
       errors.push('Stock tick size is required');
-    } else if (isNaN(Number(data.stockTicker))) {
-      errors.push('Stock tick size must be a number');
     }
 
     if (!data.stockVolume) {
@@ -91,9 +95,9 @@ export const StockRegistrationForm: React.FC = () => {
         />
       </div>
       <div>
-        <label htmlFor="stockTicker">Stock Tick Size:</label>
+        <label htmlFor="stockTicker">Stock Ticker:</label>
         <input
-          type="number"
+          type="text"
           id="stockTicker"
           name="stockTicker"
           value={formData.stockTicker}

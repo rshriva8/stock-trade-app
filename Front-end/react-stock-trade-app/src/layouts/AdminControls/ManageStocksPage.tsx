@@ -1,8 +1,6 @@
 import React from "react";
 import { useState, useEffect } from "react"
-import StockModel from "../../models/StockModels"
 import { SpinnerLoading } from "../Utils/SpinnerLoading";
-import NewStockForm from "../ConfigStocks/NewStockForm";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import StockDataModel from "../../models/StockDataModel";

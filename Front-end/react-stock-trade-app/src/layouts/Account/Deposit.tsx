@@ -24,7 +24,14 @@ function Deposit() {
   }, []);
 
   const handleDepositChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setDepositAmount(event.target.value);
+    const dep=event.target.value;
+    const regex = /^\d*\.?\d*$/;
+    if(regex.test(dep)){
+      setDepositAmount(event.target.value);
+    }
+    else{
+      setDepositAmount('0');
+    }
   }
   const handleDepositSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();

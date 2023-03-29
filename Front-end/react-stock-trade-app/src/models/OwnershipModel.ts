@@ -1,8 +1,10 @@
 
 class User {
     id: number;
-    constructor(id:number) {
+    balance: number;
+    constructor(id:number, balance:number) {
         this.id=id
+        this.balance=balance;
     }
 }
 class Stocks {

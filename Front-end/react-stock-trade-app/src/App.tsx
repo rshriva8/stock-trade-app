@@ -17,14 +17,15 @@ import AccountInfo from './layouts/Account/AccountInfo'
 import Deposit from './layouts/Account/Deposit';
 import Withdraw from './layouts/Account/Withdraw';
 import MyStocks from './layouts/Account/MyStocks';
-import { SellStock } from './layouts/Account/SellStock';
+import { SellStock } from './layouts/CheckOutPage/SellStock';
 import AccountHistory from './layouts/Account/AccountHistory';
 import StockData from './layouts/SearchStocksPage/StockData';
-import LimitOrder from './layouts/CheckOutPage/LimitOrderBuy';
+import LimitOrder, { LimitOrderBuy } from './layouts/CheckOutPage/LimitOrderBuy';
 import MyLimitOrders from './layouts/Account/MyLimitOrders';
 import CancelOrder from './layouts/CheckOutPage/CancelOrder';
 import SetHoliday from './layouts/AdminControls/SetHoliday';
 import RemoveStock from './layouts/AdminControls/RemoveStock';
+import LimitOrderSell from './layouts/CheckOutPage/LimitOrderSell';
 
 export const  App = () => {
 
@@ -113,8 +114,11 @@ export const  App = () => {
           <Route path='/remove/:stockId'>
             <RemoveStock />
           </Route>
-          <Route path='/limitorder/:stockId'>
-            <LimitOrder />
+          <Route path='/limitorderbuy/:stockId'>
+            <LimitOrderBuy />
+          </Route>
+          <Route path='/limitordersell/:stockId'>
+            <LimitOrderSell />
           </Route>
           <Route path='/sell-stock/:stockId'>
             <SellStock />

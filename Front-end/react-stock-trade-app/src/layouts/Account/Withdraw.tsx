@@ -24,7 +24,14 @@ function Withdraw() {
   }, []);
 
   const handleWithdrawChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setWithdrawAmount(event.target.value);
+    const wdrw=event.target.value;
+    const regex = /^\d*\.?\d*$/;
+    if(regex.test(wdrw)){
+      setWithdrawAmount(event.target.value);
+    }
+    else{
+      setWithdrawAmount('0');
+    }
   }
   const handleWithdrawSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();

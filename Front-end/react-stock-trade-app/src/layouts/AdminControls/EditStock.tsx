@@ -7,13 +7,13 @@ import { SpinnerLoading } from "../Utils/SpinnerLoading";
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
     new_value: number;
     new_name: string;
-    new_ticker: number;
+    new_ticker: string;
 }
 
 interface StockUpdation {
     stockName: string;
     stockValue: number;
-    stockTicker: number;
+    stockTicker: string;
     stockVolume: number;
 }
 
@@ -52,7 +52,7 @@ export const EditStock = () => {
     const [formData, setFormData] = useState<StockUpdation>({
         stockName: '',
         stockValue: 0,
-        stockTicker: 0,
+        stockTicker: '',
         stockVolume: 0
     });
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -149,10 +149,10 @@ export const EditStock = () => {
                 <div>
                     <label htmlFor="stockTicker">Stock Tick Size:</label>
                     <input
-                        type="number"
+                        type="text"
                         id="stockTicker"
                         name="stockTicker"
-                        value={(formData.stockTicker)==0 ? stock?.stockTicker:formData.stockTicker}
+                        value={(formData.stockTicker)=='' ? stock?.stockTicker:formData.stockTicker}
                         onChange={handleInputChange}
                     />
                 </div>

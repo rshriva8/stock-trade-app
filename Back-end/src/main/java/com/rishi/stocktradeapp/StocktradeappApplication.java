@@ -43,10 +43,11 @@ public class StocktradeappApplication {
 			int max=2;
 			int min=1;
 			double new_price=price-(new Random().nextBoolean() ? ((Math.random() * (max - min)) + min) : (-1)*((Math.random() * (max - min)) + min));
+			if(new_price<0) new_price=0;
 			stock.setStockValue(new_price);
             stockRepository.save(stock);
         }
-	    logger.info("=======================Stocks Updated!!================ ");
+	    logger.info("=======================Stocks Updated!!=============== ");
 	  }
 	
 //	@PostConstruct

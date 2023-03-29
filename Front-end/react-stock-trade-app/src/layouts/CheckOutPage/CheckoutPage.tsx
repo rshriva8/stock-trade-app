@@ -32,14 +32,14 @@ export const CheckoutPage = () => {
     const [stock, setStock] = useState<StockModel>();
     const [isLoading, setIsLoading] = useState(true);
     const [httpError, setHttpError] = useState(null);
-    const [inputValue, setInputValue] = useState<string>("");
     const [result, setResult] = useState<number>(0);
     const [buyVolume, setBuyVolume] = useState('');
     const [balance, setBalance] = useState(null);
     const [isOpen, setIsOpen] = useState(false);
+    const [holidays, setHolidays] = useState<any[]>([])
+    const [isHoliday, setIsHoliday] = useState(false);
     const [marketSchedule, setMarketSchedule] = useState<MarketDay[]>([]);
-    const[isHoliday,setIsHoliday]=useState(false);
-
+    // const [marketSchedule, setMarketSchedule] = useState<MarketDay[]>([]);
 
 
     const stockId = (window.location.pathname).split('/')[2];
@@ -81,6 +81,7 @@ export const CheckoutPage = () => {
             };
             setStock(loadedStocks);
             setIsLoading(false);
+            fetchMarketSchedule();
 
         };
         fetchStocks().catch((error: any) => {
@@ -88,6 +89,37 @@ export const CheckoutPage = () => {
             setHttpError(error.message);
         })
     },[]);
+
+    useEffect(() => {
+        async function fetchHolidays() {
+          const result = await axios.get('http://localhost:8080/api/holiday/get-holidays', {
+            headers: {
+                Authorization: `${localStorage.getItem('token')}`
+            }});
+          setHolidays(result.data);
+        }
+    
+        fetchHolidays();
+      }, []);
+
+      useEffect(() => {
+        const today = new Date();
+        const todaysdate = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+        holidays.forEach(holiday => {
+            const idate=holiday.date
+            const formatDate = (idate: Date) => {
+                const date = new Date(idate);
+                const year = date.getFullYear();
+                const month = date.getMonth() + 1;
+                const day = date.getDate();
+                return `${year}-${month}-${day}`;
+              }
+          if (formatDate(idate) == todaysdate) {
+            setIsHoliday(true);
+            console.log("true hai")
+          }
+        });
+      }, [holidays]);
     
     const fetchMarketSchedule = async () => {
         const response = await fetch("http://localhost:8080/market-hours/marketSchedule", {
@@ -98,30 +130,20 @@ export const CheckoutPage = () => {
         if (!response.ok) {
           throw new Error("Failed to fetch market schedule");
         }
-        const data = await response.json();
-        const current = new Date();
-        const response2 = axios.get("http://localhost:8080/api/v1/check-holiday", {
-            params:{
-                date: `${current.getFullYear()}-${current.getMonth()+1}-${current.getDate()}`
-            },
-            headers: {
-                Authorization: `${localStorage.getItem('token')}`
-            },
+        const data = response.json().then((data) => {
+            setMarketSchedule(data);
         })
-        setIsHoliday((await response2).data);
-        setMarketSchedule(data);
-        checkMarketStatus();
       };
-      const checkMarketStatus = () => {
-        // Get the current time and day of the week
+
+      
+      useEffect(() => {
         const now = new Date();
         const currentDay = now.getDay();
         const currentTime = now.getHours() * 60 + now.getMinutes();
-    
-        // Check if the market is open
+        console.log(marketSchedule)
         const marketDay = marketSchedule.find(day => day.openDaysOfWeek.toString() === currentDay.toString());
         console.log(currentDay)
-        if (marketDay && marketDay.open) {
+        if (marketDay) {
             const openTime = marketDay.openingTime.split(":").map(Number);
           const closeTime = marketDay.closingTime.split(":").map(Number);
           const openMinutes = openTime[0] * 60 + openTime[1];
@@ -131,9 +153,8 @@ export const CheckoutPage = () => {
             setIsOpen(true);
           }
         }
-      };
-      
-    fetchMarketSchedule();
+      }, [marketSchedule])
+    
     
       if (isLoading) {
         return (
@@ -149,19 +170,24 @@ export const CheckoutPage = () => {
     }
     
     const handleBuyChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setBuyVolume(event.target.value);
         const n=parseInt(event.target.value)
         if(!isNaN(n)){
             setResult(stock?.stockValue?stock?.stockValue * n: 0);
         }
+        const buyVol=event.target.value;
+        const regex = /^\d*\.?\d*$/;
+        if(regex.test(buyVol)){
+            setBuyVolume(event.target.value);
+        }
+        else{
+            setBuyVolume('0');
+        }
     }
     const handleBuySubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-        
-
+        fetchMarketSchedule();
         event.preventDefault();
         if(isHoliday) alert("TODAY IS HOLIDAY!")
-        else
-        if (isOpen && balance && result <= balance && buyVolume != '') {
+        else if (isOpen && balance && result <= balance && buyVolume != '') {
             axios.get('http://localhost:8080/api/v1/auth/buystock', {
                 params: { volume: buyVolume,
                 stockId: parseInt(stockId),
@@ -220,7 +246,7 @@ export const CheckoutPage = () => {
             <div><button className="btn btn-secondary">Buy Now</button></div>
             </div>
             </form>
-            <td><Link to={`/limitorder/${stockId}`}><button className="btn btn-primary">Limit Order</button></Link></td>
+            <td><Link to={`/limitorderbuy/${stockId}`}><button className="btn btn-primary">Limit Order</button></Link></td>
             <hr />
         </div>
     );

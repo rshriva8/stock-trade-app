@@ -6,6 +6,7 @@ import OwnershipModel from '../../models/OwnershipModel';
 
 function MyStocks() {
   const [rows, setRows] = useState<OwnershipModel[]>([]);
+  const[myBal, setMyBal] = useState(0);
 
  
   useEffect(() => {
@@ -24,11 +25,13 @@ function MyStocks() {
               user_stocks_id: data[key].user_stocks_id,
               userStocksVolume: data[key].userStocksVolume,
               user: data[key].user,
-              stocks: data[key].stocks
+              stocks: data[key].stocks,
           });
           myval+=data[key].stocks?.stockValue*data[key].userStocksVolume;
           setRows(loadedStocks);
+          setMyBal(data[key].user.balance);
     }
+    
     
 
 }
@@ -38,7 +41,8 @@ fetchRows();
   return (
     <div className='mt-5 container'>
         <div className='card'>
-            <h5> Total value : {myval}</h5>
+            <h5> Total Stocks Portfolio Value : {myval}</h5>
+            <h5> Available Balance : {myBal}</h5>
             <div className='card-header'>
                 My PortFolio
             </div>
@@ -64,6 +68,7 @@ fetchRows();
                                 <td>{rows.userStocksVolume}</td>
                                 <td>{(rows.userStocksVolume) * (rows.stocks?.stockValue ? rows.stocks?.stockValue : 0)}</td>
                                 <td><Link to={`/sell-stock/${rows.stocks?.id}`}><button className="btn btn-primary">Sell</button></Link></td>
+                                <td><Link to={`/limitordersell/${rows.stocks?.id}`}><button className="btn btn-primary">Limit Order Sell</button></Link></td>
                             </tr>
                         ))}
                     </tbody>

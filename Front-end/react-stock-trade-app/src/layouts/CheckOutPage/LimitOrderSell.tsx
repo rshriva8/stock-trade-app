@@ -25,8 +25,9 @@ export const LimitOrderBuy = () => {
     const [marketSchedule, setMarketSchedule] = useState<MarketDay[]>([]);
     const [desiredPrice, setDesiredPrice] = useState('');
     const [expiryDate, setExpiryDate] = useState('');
+    const [holidays, setHolidays] = useState<any[]>([])
     const [volume, setVolume] = useState('');
-    const[isHoliday,setIsHoliday]=useState(false);
+    const [isHoliday, setIsHoliday] = useState(false);
 
 
     const stockId = (window.location.pathname).split('/')[2];
@@ -67,18 +68,8 @@ export const LimitOrderBuy = () => {
                 stockVolume: responseData.stockVolume
             };
             setStock(loadedStocks);
-
-            const current = new Date();
-            const response2 = axios.get("http://localhost:8080/api/v1/check-holiday", {
-                params:{
-                    date: `${current.getFullYear()}-${current.getMonth()+1}-${current.getDate()}`
-                },
-                headers: {
-                    Authorization: `${localStorage.getItem('token')}`
-                },
-            })
-            setIsHoliday((await response2).data);
             setIsLoading(false);
+            fetchMarketSchedule();
 
         };
         fetchStocks().catch((error: any) => {
@@ -86,6 +77,37 @@ export const LimitOrderBuy = () => {
             setHttpError(error.message);
         })
     },[]);
+
+    useEffect(() => {
+        async function fetchHolidays() {
+          const result = await axios.get('http://localhost:8080/api/holiday/get-holidays', {
+            headers: {
+                Authorization: `${localStorage.getItem('token')}`
+            }});
+          setHolidays(result.data);
+        }
+    
+        fetchHolidays();
+      }, []);
+
+      useEffect(() => {
+        const today = new Date();
+        const todaysdate = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+        holidays.forEach(holiday => {
+            const idate=holiday.date
+            const formatDate = (idate: Date) => {
+                const date = new Date(idate);
+                const year = date.getFullYear();
+                const month = date.getMonth() + 1;
+                const day = date.getDate();
+                return `${year}-${month}-${day}`;
+              }
+          if (formatDate(idate) == todaysdate) {
+            setIsHoliday(true);
+            console.log("true hai")
+          }
+        });
+      }, [holidays]);
     
     const fetchMarketSchedule = async () => {
         const response = await fetch("http://localhost:8080/market-hours/marketSchedule", {
@@ -98,18 +120,18 @@ export const LimitOrderBuy = () => {
         }
         const data = await response.json();
         setMarketSchedule(data);
-        checkMarketStatus();
       };
-      const checkMarketStatus = () => {
-        // Get the current time and day of the week
+
+      useEffect(() => {
         const now = new Date();
         const currentDay = now.getDay();
         const currentTime = now.getHours() * 60 + now.getMinutes();
     
         // Check if the market is open
+        console.log(marketSchedule)
         const marketDay = marketSchedule.find(day => day.openDaysOfWeek.toString() === currentDay.toString());
         console.log(currentDay)
-        if (marketDay && marketDay.open) {
+        if (marketDay) {
             const openTime = marketDay.openingTime.split(":").map(Number);
           const closeTime = marketDay.closingTime.split(":").map(Number);
           const openMinutes = openTime[0] * 60 + openTime[1];
@@ -119,10 +141,8 @@ export const LimitOrderBuy = () => {
             setIsOpen(true);
           }
         }
-      };
-      
-    fetchMarketSchedule();
-    
+      }, [marketSchedule])
+
       if (isLoading) {
         return (
             <SpinnerLoading />
@@ -137,28 +157,46 @@ export const LimitOrderBuy = () => {
     }
     
     const handlePriceChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setDesiredPrice(event.target.value);
         const n=parseInt(volume)
         const np=parseInt(event.target.value)
         if(!isNaN(n) && !isNaN(np)){
             setResult(n * np);
         }
+        const price=event.target.value;
+      const regex = /^\d*\.?\d*$/;
+      if(regex.test(price)){
+        setDesiredPrice(event.target.value);
+        setResult(n * np)
+      }
+      else{
+        setDesiredPrice('0');
+        setResult(0)
+      }
     }
     const handleVolChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setVolume(event.target.value);
         const n=parseInt(event.target.value)
         const np=parseInt(desiredPrice)
         if(!isNaN(n) && !isNaN(np)){
             setResult(n * np);
+        }
+        const vol=event.target.value;
+        const regex = /^\d*\.?\d*$/;
+        if(regex.test(vol)){
+          setVolume(event.target.value);
+          setResult(n * np)
+        }
+        else{
+          setVolume('0');
+          setResult(0)
         }
     }
     const handleBuySubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         
 
         event.preventDefault();
-        if(isHoliday) alert("TODAY IS HOLIDAY!")
-        else
-        if (isOpen && balance && result <= balance && volume != '') {
+        if(expiryDate=='') alert("Please Select an EXPIRY DATE");
+        else if(isHoliday) alert("TODAY IS HOLIDAY!")
+        else if(isOpen && balance && result <= balance && volume != '') {
             axios.get('http://localhost:8080/api/orders/limit-sell', {
                 params: { volume: volume,
                 stockId: parseInt(stockId),

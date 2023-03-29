@@ -9,6 +9,7 @@ import axios from "axios";
 export const Nav = () => {
   const [login, setLogin] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [bal, setBal] =useState(0);
   useEffect(() => {
     setLogin(isLoggedIn())
     const dt = (localStorage.getItem("userData"));
@@ -25,6 +26,7 @@ export const Nav = () => {
         const dtObj = dt ? JSON.parse(dt) : null;
         if (dtObj.roles.length == 2) setIsAdmin(true);
         console.log(dtObj.firstName)
+        setBal(dtObj.balance);
       } catch (error) {
         console.log(error)
       }
@@ -57,11 +59,25 @@ export const Nav = () => {
         login && (
           <NavItem>
             <Navbar.Content>
+              <Navbar.Link color="inherit" href="/myportfolio">
+                My Portfolio
+              </Navbar.Link>
+              <Navbar.Link color="inherit" href="/mylimitorders">
+                Limit Orders
+              </Navbar.Link>
+              <Navbar.Link color="inherit" href="/myhistory">
+                Transactions
+              </Navbar.Link>
               <Navbar.Link color="inherit" href="/account">
                 My Account
               </Navbar.Link>
               <Navbar.Item>
-                <Button auto flat as={Link} href="/logout" onClick={handleLogout}>
+                <Button auto bordered>
+                  ${bal}
+                </Button>
+              </Navbar.Item>
+              <Navbar.Item>
+                <Button auto flat as={Link} href="/#" onClick={handleLogout} color='error'>
                   Logout
                 </Button>
               </Navbar.Item>
